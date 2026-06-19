@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Notes — Live Feed</title>
+    <meta name="description" content="Browse the latest Google BigQuery release notes and share updates on X/Twitter.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <!-- Ambient background blobs -->
+    <div class="ambient-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="none">
+                        <path d="M5.5 7L12 3.5L18.5 7V17L12 20.5L5.5 17V7Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                        <path d="M12 3.5V20.5" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M5.5 7L18.5 17" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M18.5 7L5.5 17" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1>BigQuery Release Notes</h1>
+                    <p class="brand-sub">Live feed from Google Cloud</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <span class="note-count" id="noteCount"></span>
+                <button class="btn-refresh" id="btnRefresh" onclick="fetchReleaseNotes()">
+                    <svg class="refresh-icon" id="refreshIcon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <polyline points="1 20 1 14 7 14"></polyline>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                    </svg>
+                    <span id="refreshText">Refresh</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="main" id="mainContent">
+        <!-- Loading skeleton shown on first load -->
+        <div class="loading-state" id="loadingState">
+            <div class="spinner-large"></div>
+            <p>Fetching release notes…</p>
+        </div>
+
+        <!-- Error state (hidden by default) -->
+        <div class="error-state hidden" id="errorState">
+            <div class="error-icon">⚠️</div>
+            <h2>Something went wrong</h2>
+            <p id="errorMessage"></p>
+            <button class="btn-refresh" onclick="fetchReleaseNotes()">Try Again</button>
+        </div>
+
+        <!-- Release notes grid -->
+        <div class="notes-grid hidden" id="notesGrid"></div>
+    </main>
+
+    <!-- Tweet Modal -->
+    <div class="modal-overlay hidden" id="tweetModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Share on X</h2>
+                <button class="modal-close" onclick="closeModal()">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label for="tweetText">Compose your post</label>
+                <textarea id="tweetText" maxlength="280" rows="5"></textarea>
+                <div class="char-count"><span id="charCount">0</span> / 280</div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-tweet" id="btnTweet" onclick="postTweet()">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    Post on X
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
