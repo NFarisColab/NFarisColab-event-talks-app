@@ -63,8 +63,16 @@ function renderNotes(notes) {
         card.className = "note-card";
         card.style.animationDelay = `${Math.min(i * 0.06, 0.8)}s`;
 
+        // Generate badges HTML if categories are present
+        const badgesHtml = (note.categories || []).map(cat => 
+            `<span class="cat-badge cat-${cat.toLowerCase()}">${escapeHtml(cat)}</span>`
+        ).join("");
+
         card.innerHTML = `
-            <span class="note-date">${escapeHtml(note.published)}</span>
+            <div class="note-meta">
+                <span class="note-date">${escapeHtml(note.published)}</span>
+                <div class="note-categories">${badgesHtml}</div>
+            </div>
             <h2 class="note-title">
                 <a href="${escapeHtml(note.link)}" target="_blank" rel="noopener noreferrer">
                     ${escapeHtml(note.title)}
@@ -85,14 +93,17 @@ function renderNotes(notes) {
                     </svg>
                     <span class="copy-label">Copy</span>
                 </button>
-                <a href="${escapeHtml(note.link)}" class="btn-read-more" target="_blank" rel="noopener noreferrer">
-                    Read more →
-                </a>
+                <button class="btn-expand-card" onclick="toggleCardExpand(${i}, this)" aria-label="Read more in-place">
+                    Read more
+                </button>
             </div>
         `;
 
         notesGrid.appendChild(card);
     });
+
+    // Check for overflowed elements and hide expand button if not overflowed
+    requestAnimationFrame(updateExpandButtonsVisibility);
 
     // Store notes globally for tweet modal access
     window.__bqNotes = notes;
@@ -296,6 +307,41 @@ function showToast(message) {
         setTimeout(() => toast.remove(), 400);
     }, 2500);
 }
+
+// ---- Card In-Place Expansion & Overflow Check ----
+
+function toggleCardExpand(index, btn) {
+    const card = btn.closest(".note-card");
+    if (!card) return;
+
+    const isExpanded = card.classList.toggle("expanded");
+
+    if (isExpanded) {
+        btn.textContent = "Read less";
+        btn.setAttribute("aria-label", "Collapse card content");
+    } else {
+        btn.textContent = "Read more";
+        btn.setAttribute("aria-label", "Read more in-place");
+        card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+}
+
+function updateExpandButtonsVisibility() {
+    document.querySelectorAll(".note-card").forEach((card) => {
+        const content = card.querySelector(".note-content");
+        const btnExpand = card.querySelector(".btn-expand-card");
+        if (content && btnExpand && !card.classList.contains("expanded")) {
+            if (content.scrollHeight <= content.clientHeight) {
+                btnExpand.classList.add("hidden");
+            } else {
+                btnExpand.classList.remove("hidden");
+            }
+        }
+    });
+}
+
+// Check visibility on window resize
+window.addEventListener("resize", updateExpandButtonsVisibility);
 
 // ---- Init ----
 loadSavedTheme();

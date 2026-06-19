@@ -47,6 +47,14 @@ def fetch_release_notes():
 
             plain_text = clean_html(content_html)
 
+            # Extract categories from H3 tags
+            categories = re.findall(r"<h3[^>]*>(.*?)</h3>", content_html)
+            # Clean categories (strip tags, whitespace)
+            categories = [re.sub(r"<[^>]+>", "", cat).strip() for cat in categories]
+            # De-duplicate while preserving order
+            seen = set()
+            unique_categories = [c for c in categories if not (c in seen or seen.add(c))]
+
             notes.append(
                 {
                     "title": entry.get("title", "Untitled"),
@@ -54,6 +62,7 @@ def fetch_release_notes():
                     "published": published,
                     "content_html": content_html,
                     "plain_text": plain_text[:280],  # For tweet preview
+                    "categories": unique_categories,
                 }
             )
 

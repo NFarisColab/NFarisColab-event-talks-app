@@ -363,6 +363,77 @@ body {
     }
 }
 
+.note-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.note-categories {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.cat-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 100px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    line-height: 1.2;
+}
+
+/* Dark Theme Badge Palette (Default) */
+.cat-feature {
+    background: rgba(0, 191, 165, 0.08);
+    border: 1px solid rgba(0, 191, 165, 0.25);
+    color: var(--accent-teal);
+}
+.cat-change {
+    background: rgba(66, 133, 244, 0.08);
+    border: 1px solid rgba(66, 133, 244, 0.25);
+    color: var(--accent-blue-bright);
+}
+.cat-issue, .cat-breaking {
+    background: rgba(234, 67, 53, 0.08);
+    border: 1px solid rgba(234, 67, 53, 0.25);
+    color: #f28b82;
+}
+.cat-announcement {
+    background: rgba(162, 89, 255, 0.08);
+    border: 1px solid rgba(162, 89, 255, 0.25);
+    color: #c58af9;
+}
+
+/* Light Theme Badge Palette */
+[data-theme="light"] .cat-feature {
+    background: rgba(0, 150, 136, 0.08);
+    border: 1px solid rgba(0, 150, 136, 0.2);
+    color: #00796b;
+}
+[data-theme="light"] .cat-change {
+    background: rgba(26, 115, 232, 0.08);
+    border: 1px solid rgba(26, 115, 232, 0.2);
+    color: #1a73e8;
+}
+[data-theme="light"] .cat-issue, [data-theme="light"] .cat-breaking {
+    background: rgba(217, 48, 37, 0.08);
+    border: 1px solid rgba(217, 48, 37, 0.2);
+    color: #c5221f;
+}
+[data-theme="light"] .cat-announcement {
+    background: rgba(123, 31, 162, 0.08);
+    border: 1px solid rgba(123, 31, 162, 0.2);
+    color: #7b1fa2;
+}
+
 .note-date {
     display: inline-flex;
     align-items: center;
@@ -400,6 +471,7 @@ body {
     color: var(--accent-blue-bright);
 }
 
+/* Note Content & Clamping */
 .note-content {
     font-size: 0.875rem;
     color: var(--text-secondary);
@@ -409,6 +481,13 @@ body {
     display: -webkit-box;
     -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
+}
+
+/* Expanded Card State */
+.note-card.expanded .note-content {
+    display: block;
+    overflow: visible;
+    -webkit-line-clamp: unset;
 }
 
 .note-content a {
@@ -473,7 +552,7 @@ body {
     transform: scale(0.97);
 }
 
-.btn-read-more {
+.btn-expand-card {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -491,7 +570,7 @@ body {
     margin-left: auto;
 }
 
-.btn-read-more:hover {
+.btn-expand-card:hover {
     background: var(--bg-glass);
     color: var(--text-primary);
     border-color: var(--border-accent);
