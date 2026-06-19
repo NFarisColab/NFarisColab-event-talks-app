@@ -1,6 +1,7 @@
 /**
  * BigQuery Release Notes — Client-side logic
- * Fetches release notes, renders cards, and handles tweet sharing.
+ * Fetches release notes, renders cards, handles tweet sharing,
+ * copy-to-clipboard, CSV export, and theme toggling.
  */
 
 // ---- DOM References ----
@@ -76,6 +77,13 @@ function renderNotes(notes) {
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                     </svg>
                     Post on X
+                </button>
+                <button class="btn-copy" onclick="copyToClipboard(${i}, this)" aria-label="Copy to clipboard">
+                    <svg class="copy-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                    <span class="copy-label">Copy</span>
                 </button>
                 <a href="${escapeHtml(note.link)}" class="btn-read-more" target="_blank" rel="noopener noreferrer">
                     Read more →
@@ -186,5 +194,109 @@ function escapeHtml(str) {
     return el.innerHTML;
 }
 
+// ---- Copy to Clipboard ----
+
+async function copyToClipboard(index, btn) {
+    const note = window.__bqNotes[index];
+    if (!note) return;
+
+    const text = `${note.title}\n${note.published}\n${note.plain_text}\n${note.link}`;
+
+    try {
+        await navigator.clipboard.writeText(text);
+        btn.classList.add("copied");
+        btn.querySelector(".copy-label").textContent = "Copied!";
+        showToast("✓ Copied to clipboard");
+
+        setTimeout(() => {
+            btn.classList.remove("copied");
+            btn.querySelector(".copy-label").textContent = "Copy";
+        }, 2000);
+    } catch (err) {
+        showToast("✕ Failed to copy");
+    }
+}
+
+// ---- Export to CSV ----
+
+function exportToCSV() {
+    const notes = window.__bqNotes;
+    if (!notes || notes.length === 0) {
+        showToast("No data to export");
+        return;
+    }
+
+    const headers = ["Title", "Published", "Summary", "Link"];
+    const csvRows = [headers.join(",")];
+
+    notes.forEach((note) => {
+        const row = [
+            csvEscape(note.title),
+            csvEscape(note.published),
+            csvEscape(note.plain_text),
+            csvEscape(note.link),
+        ];
+        csvRows.push(row.join(","));
+    });
+
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `bigquery-release-notes-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    showToast(`✓ Exported ${notes.length} notes to CSV`);
+}
+
+function csvEscape(str) {
+    if (!str) return '""';
+    return '"' + str.replace(/"/g, '""') + '"';
+}
+
+// ---- Theme Toggle ----
+
+function toggleTheme() {
+    const html = document.documentElement;
+    const current = html.getAttribute("data-theme");
+    const next = current === "light" ? "dark" : "light";
+    html.setAttribute("data-theme", next);
+    localStorage.setItem("bq-theme", next);
+}
+
+function loadSavedTheme() {
+    const saved = localStorage.getItem("bq-theme");
+    if (saved) {
+        document.documentElement.setAttribute("data-theme", saved);
+    }
+}
+
+// ---- Toast Notification ----
+
+function showToast(message) {
+    // Remove existing toast
+    const existing = document.querySelector(".toast");
+    if (existing) existing.remove();
+
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // Trigger animation
+    requestAnimationFrame(() => {
+        toast.classList.add("show");
+    });
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 400);
+    }, 2500);
+}
+
 // ---- Init ----
+loadSavedTheme();
 fetchReleaseNotes();
